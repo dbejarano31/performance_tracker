@@ -3,9 +3,9 @@ name: Validate promotion path
 on:
   pull_request:
     branches:
-      - development
-      - validation
-      - production
+      - dev
+      - test
+      - prod
 
 jobs:
   validate-promotion:
@@ -20,21 +20,21 @@ jobs:
 
           echo "PR: $SOURCE -> $TARGET"
 
-          if [[ "$TARGET" == "development" ]]; then
+          if [[ "$TARGET" == "dev" ]]; then
             if [[ "$SOURCE" != feature/* && "$SOURCE" != fix/* && "$SOURCE" != hotfix/* ]]; then
-              echo "ERROR: development only accepts feature/*, fix/*, or hotfix/* branches."
+              echo "ERROR: dev only accepts feature/*, fix/*, or hotfix/* branches."
               exit 1
             fi
 
-          elif [[ "$TARGET" == "validation" ]]; then
-            if [[ "$SOURCE" != "development" ]]; then
-              echo "ERROR: validation only accepts promotions from development."
+          elif [[ "$TARGET" == "test" ]]; then
+            if [[ "$SOURCE" != "dev" ]]; then
+              echo "ERROR: test only accepts promotions from dev."
               exit 1
             fi
 
-          elif [[ "$TARGET" == "production" ]]; then
-            if [[ "$SOURCE" != "validation" ]]; then
-              echo "ERROR: production only accepts promotions from validation."
+          elif [[ "$TARGET" == "prod" ]]; then
+            if [[ "$SOURCE" != "test" ]]; then
+              echo "ERROR: prod only accepts promotions from test."
               exit 1
             fi
           fi
