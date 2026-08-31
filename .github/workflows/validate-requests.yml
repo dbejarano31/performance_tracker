@@ -1,0 +1,42 @@
+name: Validate promotion path
+
+on:
+  pull_request:
+    branches:
+      - development
+      - validation
+      - production
+
+jobs:
+  validate-promotion:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate source and target branch
+        shell: bash
+        run: |
+          SOURCE="${{ github.head_ref }}"
+          TARGET="${{ github.base_ref }}"
+
+          echo "PR: $SOURCE -> $TARGET"
+
+          if [[ "$TARGET" == "development" ]]; then
+            if [[ "$SOURCE" != feature/* && "$SOURCE" != fix/* && "$SOURCE" != hotfix/* ]]; then
+              echo "ERROR: development only accepts feature/*, fix/*, or hotfix/* branches."
+              exit 1
+            fi
+
+          elif [[ "$TARGET" == "validation" ]]; then
+            if [[ "$SOURCE" != "development" ]]; then
+              echo "ERROR: validation only accepts promotions from development."
+              exit 1
+            fi
+
+          elif [[ "$TARGET" == "production" ]]; then
+            if [[ "$SOURCE" != "validation" ]]; then
+              echo "ERROR: production only accepts promotions from validation."
+              exit 1
+            fi
+          fi
+
+          echo "Promotion path is valid."
