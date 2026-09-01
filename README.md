@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Build a private, single-user health-data intelligence app for Daniel. It connects existing wearable and workout data, preserves the source data, and gives an AI coach enough context to recommend practical actions toward the user's goals.
+Build a private, single-user health-data intelligence app for Daniel. It connects existing wearable and workout data, preserves the source data, and provides the reliable, source-aware context that **Arnie**—a separate agent profile running alongside Harvey—needs to act as the coach.
 
 This is **not** another manual logging app. Wearables and workout platforms remain the primary source of measurement. Optional user input is short, structured, and only used when the data alone cannot explain a meaningful event or trend.
 
@@ -25,7 +25,7 @@ The private alpha may later be shared with close friends and family, but it is n
 2. Import historical data and keep it current incrementally.
 3. Normalize health measurements and detailed strength workouts into a source-aware timeline.
 4. Capture optional structured context through a small form.
-5. Provide an AI coach that can explain a recommendation using the user's own data.
+5. Provide an evidence-ready context contract for Arnie, the separate coaching agent profile.
 6. Establish data quality, sync-status, and consent controls needed before a small private beta.
 
 ### Out of scope for this alpha
@@ -114,20 +114,23 @@ The implementation must keep raw provider payloads separately from normalized en
 | `strength_set` | workout ID, exercise, set number, reps, load, unit, RPE if present | Hevy |
 | `body_measurement` | date, metric, value, unit, source, source ID | Hevy; later providers |
 | `context_event` | type, occurred-at, structured value, optional note, user confirmation | App form |
-| `coach_recommendation` | goal, recommendation, evidence IDs, confidence, caveats, reassess-at, outcome | App |
+| `coach_recommendation` | goal, recommendation, evidence IDs, reasoning, confidence, caveats, reassess-at, outcome | Arnie (stored/displayed by app) |
 
-## AI coach requirements
+## Arnie coaching-context contract
 
-The coach is a decision-support layer over the normalized timeline. Every recommendation must include:
+**Arnie** is the separate agent profile that will interpret the health data and act as Daniel's coach. This application does **not** host, select, invoke, or present an AI model. Its responsibility is to make trustworthy, privacy-controlled data and context available to Arnie when the gateway is activated.
 
-1. **Action:** a concrete next step or an explicit recommendation to hold steady.
-2. **Evidence:** linked measurements, workouts, and/or context events with dates.
-3. **Reasoning:** why those data support the action.
-4. **Confidence:** high, medium, or low, based on data coverage and consistency.
-5. **Caveats:** missing data, conflicting signals, or non-medical safety boundary.
-6. **Reassessment:** the date, condition, or next data event that will evaluate the recommendation.
+The app must provide Arnie with a versioned, source-aware coaching-context package containing:
 
-The coach must distinguish factual readings from inference. It may propose small experiments, but it must not claim causality until there is enough evidence.
+1. **Goal context:** explicit, editable user goals and any active experiments.
+2. **Evidence:** linked measurements, workouts, and context events with dates, source, coverage, and raw-record references.
+3. **Data quality:** data freshness, granted permissions, missing ranges, duplicate links, and conflicting signals.
+4. **Safety metadata:** the wellness boundary and any user-reported illness, injury/pain, or other context that must affect interpretation.
+5. **Outcome tracking:** prior recommendations or experiments, their reassessment date, and the user-confirmed outcome.
+
+Any recommendation is authored by Arnie, not by the application. When the application stores or displays an Arnie recommendation, it must preserve the recommendation's evidence IDs, reasoning, confidence, caveats, and reassessment date so the user can audit what information Arnie used.
+
+Arnie must distinguish factual readings from inference. It may propose small experiments, but it must not claim causality until there is enough evidence.
 
 ## Later connectors — requirements, not alpha work
 
@@ -173,5 +176,5 @@ Reference: https://help.trainerize.com/hc/en-us/articles/37082084919060-Using-AP
 
 - Huawei Health and Hevy have reliable, observable connection states.
 - The app presents a unified timeline without silently double-counting data.
-- The AI coach produces one useful, evidence-backed, non-medical recommendation from real connected data.
+- The app can supply Arnie with a complete, evidence-backed, non-medical coaching-context package from real connected data.
 - Daniel can understand data provenance, disconnect a provider, and delete imported data.
